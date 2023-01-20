@@ -32,7 +32,7 @@ def execute_binary(instruction_seq):
         return 'tmeout'
     stderr = result.stderr.decode("utf-8")
     if stderr[-3:] == 'end':
-        return 'complete'
+        return 'incomplete'
     elif stderr == '':
         return 'complete'
     else:
@@ -51,6 +51,8 @@ def validate_lua(input_str, log_level):
         print(repr(output))
         if output == "complete":
             return "complete",-1,""
+        elif output == "incomplete":
+            return "incomplete", -1, ""
         else:
             return "wrong", len(input_str), "input_str[-1]"
     except Exception as e:
@@ -100,6 +102,7 @@ import time
 def create_valid_strings(n, log_level):
     os.remove("valid_inputs.txt") if os.path.exists('valid_inputs.txt') else None
     tic = time.time()
+    i = 0
     while True: # while
         i += 1
         created_string = generate(log_level)
