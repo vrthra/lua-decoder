@@ -51,7 +51,7 @@ def validate_lua(input_str, log_level):
     try:
         instruction_seq = input_str
         create_lua_binary(instruction_seq)
-        output = execute_binary(input_str)
+        output = execute_binary()
         print(repr(output))
         if output == "complete":
             return "complete",-1,""
