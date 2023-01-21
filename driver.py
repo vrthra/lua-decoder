@@ -29,7 +29,7 @@ def create_lua_binary(instruction_seq):
         binary_file.write(binary_form)
     return instruction_seq
 
-def execute_binary(instruction_seq):
+def execute_binary():
     try:
         result = subprocess.run(['lua', lua_p], stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=1)
     except subprocess.TimeoutExpired:
