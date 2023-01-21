@@ -5,8 +5,12 @@ import subprocess
 import random
 import time
 import string
+MAX_LEN = 1000
+MAX_LOOPS = 100000
+MAX_TRIES = 10000
 
 import consts as K
+L_INS = len(K.INSTRUCTIONS)
 
 lua_p = 'compiled.luap'
 
@@ -61,10 +65,11 @@ def validate_lua(input_str, log_level):
         n = len(msg)
         return "wrong", n, ""
 
-def get_next_char(log_level):
-    set_of_chars = K.INSTRUCTIONS
-    idx = random.randrange (0,len(set_of_chars),1)
-    input_char = set_of_chars[idx]
+def get_next_char(log_level, pool):
+    if L_INS - len(pool) > MAX_TRIES:
+        return None
+    print(len(pool), end=' ')
+    input_char = pool.pop()
     return input_char
 
 import random
@@ -76,8 +81,12 @@ def generate(log_level):
     :returns completed string
     """
     prev_str = []
-    while True:
-        char = get_next_char(log_level)
+    i = 0
+    pool = list(K.INSTRUCTIONS)
+    random.shuffle(pool)
+    while i < MAX_LOOPS:
+        i += 1
+        char = get_next_char(log_level, pool)
         curr_str = prev_str + char
         rv, n, c = validate_lua(curr_str, log_level)
 
@@ -87,9 +96,16 @@ def generate(log_level):
             if random.randrange(5) == 0:
                 return curr_str
             else:
+                pool = list(K.INSTRUCTIONS)
+                random.shuffle(pool)
                 prev_str = curr_str
                 continue
         elif rv == "incomplete": # go ahead...
+            print('.', end='')
+            if len(curr_str) >= MAX_LEN:
+                return curr_str
+            pool = list(K.INSTRUCTIONS)
+            random.shuffle(pool)
             prev_str = curr_str
             continue
         elif rv == "wrong": # try again with a new random character do not save current character
