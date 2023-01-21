@@ -87,6 +87,7 @@ def generate(log_level):
     while i < MAX_LOOPS:
         i += 1
         char = get_next_char(log_level, pool)
+        if not char: return curr_str
         curr_str = prev_str + char
         rv, n, c = validate_lua(curr_str, log_level)
 
