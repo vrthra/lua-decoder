@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
-import json
-import os
+import consts as K
 import subprocess
 import random
 import time
-import string
+import os
+
 MAX_LEN = 1000
 MAX_LOOPS = 100000
 MAX_TRIES = 10000
 
-import consts as K
 L_INS = len(K.INSTRUCTIONS)
-
 lua_p = 'compiled.luap'
+
 
 def generate_random_instruction(): # 4-byte instruction
     for i in range(4): yield random.randint(0, 255)
@@ -29,11 +28,11 @@ def create_lua_binary(instruction_seq):
         binary_file.write(binary_form)
     return instruction_seq
 
-def execute_binary(instruction_seq):
+def execute_binary():
     try:
         result = subprocess.run(['lua', lua_p], stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=1)
     except subprocess.TimeoutExpired:
-        return 'tmeout'
+        return 'timeout'
     stderr = result.stderr.decode("utf-8")
     if stderr[-3:] == 'end':
         return 'incomplete'
@@ -51,7 +50,7 @@ def validate_lua(input_str, log_level):
     try:
         instruction_seq = input_str
         create_lua_binary(instruction_seq)
-        output = execute_binary(input_str)
+        output = execute_binary()
         print(repr(output))
         if output == "complete":
             return "complete",-1,""
@@ -72,8 +71,7 @@ def get_next_char(log_level, pool):
     input_char = pool.pop()
     return input_char
 
-import random
-def generate(log_level):
+def generate(log_level, misbehaving_ins):
     """
     Feed it one character at a time, and see if the parser rejects it.
     If it does not, then append one more character and continue.
@@ -109,23 +107,27 @@ def generate(log_level):
             prev_str = curr_str
             continue
         elif rv == "wrong": # try again with a new random character do not save current character
+            misbehaving_ins.append(char)
             continue
         else:
             print("ERROR What is this I dont know !!!")
             break
     return None
-import time
+
 def create_valid_strings(n, log_level):
     os.remove("valid_inputs.txt") if os.path.exists('valid_inputs.txt') else None
+    os.remove("misbehaving_instructions.txt") if os.path.exists('misbehaving_instructions.txt') else None
     tic = time.time()
     i = 0
     while True: # while
         i += 1
-        created_string = generate(log_level)
+        misbehaving_ins = []
+        created_string = generate(log_level, misbehaving_ins)
         toc = time.time()
         if created_string is not None:
-            with open("valid_inputs.txt", "a") as myfile:
+            with open("valid_inputs.txt", "a") as myfile, open("misbehaving_instructions.txt", "a") as file:
                 var = f"Time used until input was generated: {toc - tic:f}\n" + repr(created_string) + "\n\n"
                 myfile.write(var)
+                [file.write(str(char)+"\n") for char in misbehaving_ins]
 
 create_valid_strings(10, 0)
