@@ -1,3 +1,4 @@
+import os
 import driver as D
 
 def validate_lua(input_str_len, log_level):
