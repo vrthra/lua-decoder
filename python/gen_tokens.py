@@ -38,8 +38,8 @@ def f():
 
 END = [116, 0, 100, 2, 131, 1, 1, 0, 100, 1, 83, 0]
 import sys
-k = [int(sys.argv[2]), int(sys.argv[3])]
-v = f.__code__.replace(co_code=bytes(PRE + k + END))
+my_args = [int(sys.argv[2]), int(sys.argv[3])]
+v = f.__code__.replace(co_code=bytes(PRE + my_args + END))
 #print(dis.dis(v))
 try:
     import dis
@@ -59,8 +59,8 @@ except ValueError:
     pass
 except SystemError:
     sys.exit(0)
-with open('tokens.py' % sys.argv[1], 'a') as f:
-    f.write('[' + ','.join([str(i) for i in k]) + '],' + '\n')
+with open('tokens.py', 'a') as f:
+    f.write('[' + ','.join([str(i) for i in my_args]) + '],' + '\n')
 
 sys.exit(0)
 
