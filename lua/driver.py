@@ -140,4 +140,5 @@ def create_valid_strings(n, log_level):
                 var = f"Time used until input was generated: {toc - tic:f}\n" + repr(created_string) + "\n\n"
                 myfile.write(var)
 
-create_valid_strings(10, 0)
+if __name__ == '__main__':
+    create_valid_strings(10, 0)
