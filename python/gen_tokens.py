@@ -59,8 +59,8 @@ except ValueError:
     pass
 except SystemError:
     sys.exit(0)
-with open('tokens_%s.py' % sys.argv[1], 'a') as f:
-    f.write('[' + ','.join([sys.argv[1], sys.argv[2]]) + '],' + '\n')
+with open('tokens.py' % sys.argv[1], 'a') as f:
+    f.write('[' + ','.join([str(i) for i in k]) + '],' + '\n')
 
 sys.exit(0)
 
