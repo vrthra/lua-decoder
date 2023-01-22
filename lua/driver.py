@@ -20,6 +20,17 @@ def generate_random_instruction(): # 4-byte instruction
 def create_body(instr_count):
     for k in range(instr_count): yield from generate_random_instruction()
 
+
+def create_lua_binary_random(instr_count):
+    instruction_seq = [j for i in range(instr_count) for j in generate_random_instruction()]
+    binary_form = (bytes(K.PREFIX) +
+                  (instr_count + 1 + 3).to_bytes(4, byteorder='little') +
+                  bytes(instruction_seq + K.PRINT + K.RETURN_INSTRUCTION + K.POSTFIX))
+    with open(lua_p, 'bw') as binary_file:
+        binary_file.write(binary_form)
+    return instruction_seq
+
+
 def create_lua_binary(instruction_seq):
     instr_count = int(len(instruction_seq) / 4)
     binary_form = (bytes(K.PREFIX) +
