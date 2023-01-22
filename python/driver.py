@@ -43,6 +43,8 @@ def f():
     print('end')
 k = bytes([%s])
 v = f.__code__.replace(co_code=bytes(k))
+#import dis
+#bytecode = dis.Bytecode(f)
 exec(v)
 """
 #import marshal
@@ -76,7 +78,7 @@ def execute_binary(instruction_seq):
         return 'tmeout'
     stderr = result.stderr.decode("utf-8")
     stdout = result.stdout.decode("utf-8")
-    if stdout[-3:] == 'end':
+    if stdout.strip()[-3:] == 'end':
         return 'incomplete'
     elif stdout == '':
         if result.returncode == -11: # segfault
