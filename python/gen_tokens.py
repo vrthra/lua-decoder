@@ -1,8 +1,10 @@
 import sys
 assert sys.version_info[0:3] == (3, 10, 9)
 # PRE = [100,1,100,2,85,1,1,0] # string
-PRE = [100,2,100,2,100,2,100,2] # string
-PRE = [100,1,100,1,100,1,100,1] # int
+if sys.argv[1] == 'S':
+    PRE = [100,2,100,2,100,2,100,2] # string
+elif sys.argv[1] == 'I':
+    PRE = [100,1,100,1,100,1,100,1] # int
 import dis
 
 def f():
@@ -36,7 +38,7 @@ def f():
 
 END = [116, 0, 100, 2, 131, 1, 1, 0, 100, 1, 83, 0]
 import sys
-k = [int(sys.argv[1]), int(sys.argv[2])]
+k = [int(sys.argv[2]), int(sys.argv[3])]
 v = f.__code__.replace(co_code=bytes(PRE + k + END))
 #print(dis.dis(v))
 try:
@@ -57,7 +59,7 @@ except ValueError:
     pass
 except SystemError:
     sys.exit(0)
-with open('tokens.py', 'a') as f:
+with open('tokens_%s.py' % sys.argv[1], 'a') as f:
     f.write('[' + ','.join([sys.argv[1], sys.argv[2]]) + '],' + '\n')
 
 sys.exit(0)

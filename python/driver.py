@@ -5,6 +5,9 @@ import subprocess
 import random
 import time
 import string
+import sys
+#assert sys.version_info == (3, 10, 9, 'final', 0)
+assert sys.version_info[0:3] == (3, 10, 9)
 MAX_LEN = 1000
 MAX_LOOPS = 100000
 MAX_TRIES = 10000
