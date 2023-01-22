@@ -86,6 +86,8 @@ def execute_binary(instruction_seq):
         elif result.returncode < 0: # segfault
             return 'error'
         else:
+           for e in ['Error:']: # ['IndexError:', 'SystemError:', 'TypeError:']:
+              if (e in stderr) or (e in stdout): return 'error'
            # if it returns without end but without signal, then it is complete
            print(result.returncode, "complete")
            return 'complete'
