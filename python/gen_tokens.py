@@ -1,6 +1,8 @@
+import sys
+assert sys.version_info[0:3] == (3, 10, 9)
 # PRE = [100,1,100,2,85,1,1,0] # string
-PRE = [100,1,100,1,100,1,100,1] # int
 PRE = [100,2,100,2,100,2,100,2] # string
+PRE = [100,1,100,1,100,1,100,1] # int
 import dis
 
 def f():
