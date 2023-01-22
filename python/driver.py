@@ -53,17 +53,21 @@ exec(v)
 python_p = 'compiled.p'
 
 def create_python_binary_random(instr_count):
-    instruction_seq = [j for i in range(instr_count) for j in generate_random_instruction()]
+    instruction_seq = []
+    for i in range(instr_count):
+        instruction_seq += random.choice(K.INSTRUCTIONS)
     instructions = [str(i) for i in  (K.PREFIX +
                   (instruction_seq + K.PRINT + K.SUFFIX))]
     with open(python_p, 'w+') as file:
         file.write(template % ','.join(instructions))
+    return instructions
 
 def create_python_binary(instruction_seq):
     instructions = [str(i) for i in  (K.PREFIX +
                   (instruction_seq + K.PRINT + K.SUFFIX))]
     with open(python_p, 'w+') as file:
         file.write(template % ','.join(instructions))
+    return instructions
 
 def execute_binary(instruction_seq):
     try:
