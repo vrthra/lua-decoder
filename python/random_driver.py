@@ -7,7 +7,7 @@ def validate_python(input_str_len, log_level):
         output = D.execute_binary('')
         print(repr(output))
         if output == "complete":
-            return "complete",-1,""
+            return "complete",input_str,""
         elif output == "incomplete":
             return "incomplete", -1, ""
         else:
