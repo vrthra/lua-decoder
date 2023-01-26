@@ -10,7 +10,7 @@ import sys
 assert sys.version_info[0:3] == (3, 10, 9)
 MAX_LEN = 1000
 MAX_LOOPS = 100000
-MAX_TRIES = 10000
+MAX_TRIES = 1000
 
 import consts as K
 L_INS = len(K.INSTRUCTIONS)
@@ -83,21 +83,15 @@ def execute_binary(instruction_seq):
     stdout = result.stdout.decode("utf-8")
     if stdout.strip()[-3:] == 'end':
         return 'incomplete'
-    elif stdout == '':
-        if result.returncode == -11: # segfault
-            return 'error'
-        elif result.returncode == -10: # segfault
-            return 'error'
-        elif result.returncode < 0: # segfault
-            return 'error'
-        else:
-           for e in ['Error:']: # ['IndexError:', 'SystemError:', 'TypeError:']:
-              if (e in stderr) or (e in stdout): return 'error'
-           # if it returns without end but without signal, then it is complete
-           print(result.returncode, "complete")
-           return 'complete'
-    else:
-        return stderr
+    if result.returncode < 0: return 'error'
+    if stderr == '':
+        # no exceptions
+        return 'complete'
+    for e in ['Error:']: # ['IndexError:', 'SystemError:', 'TypeError:']:
+      if (e in stderr) or (e in stdout): return 'error'
+    # if it returns without end but without signal, then it is complete
+    print(result.returncode, "complete")
+    return 'complete'
 
 def validate_python(input_str, log_level):
     """ return:
@@ -141,27 +135,23 @@ def generate(log_level):
     i = 0
     pool = list(K.INSTRUCTIONS)
     random.shuffle(pool)
+    inputs = []
     while i < MAX_LOOPS:
         i += 1
         char = get_next_char(log_level, pool)
-        if not char: return curr_str
+        if not char: break # return inputs
         curr_str = prev_str + char
         rv, n, c = validate_python(curr_str, log_level)
 
         if log_level:
             print("%s n=%d, c=%s. Input string is %s" % (rv,n,c,curr_str))
         if rv == "complete":
-            if random.randrange(5) == 0:
-                return curr_str
-            else:
-                pool = list(K.INSTRUCTIONS)
-                random.shuffle(pool)
-                prev_str = curr_str
-                continue
+            break # return inputs
         elif rv == "incomplete": # go ahead...
             print('.', end='')
+            inputs.append(curr_str)
             if len(curr_str) >= MAX_LEN:
-                return curr_str
+                break # return inputs
             pool = list(K.INSTRUCTIONS)
             random.shuffle(pool)
             prev_str = curr_str
@@ -171,20 +161,23 @@ def generate(log_level):
         else:
             print("ERROR What is this I dont know !!!")
             break
-    return None
+    return inputs
+
 import time
 def create_valid_strings(n, log_level):
-    os.remove("valid_inputs.txt") if os.path.exists('valid_inputs.txt') else None
+    os.remove("my_valid_inputs.txt") if os.path.exists('my_valid_inputs.txt') else None
     tic = time.time()
     i = 0
-    while True: # i < 10
-        i += 1
-        created_string = generate(log_level)
-        toc = time.time()
-        if created_string is not None:
-            with open("valid_inputs.txt", "a") as myfile:
-                var = f"Time used until input was generated: {toc - tic:f}\n" + repr(created_string) + "\n\n"
+    with open("my_valid_inputs.txt", "a") as myfile:
+        while True: # i < 10
+            i += 1
+            created_strings = generate(log_level)
+            toc = time.time()
+            for created_string in created_strings:
+                assert isinstance(created_string, list), str(created_string)
+                var = (f"Time used until input was generated: {toc - tic:f}\n" + repr(created_string) + "\n\n")
                 myfile.write(var)
+                myfile.flush()
 
 if __name__ == '__main__':
     create_valid_strings(10, 0)

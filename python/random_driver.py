@@ -1,5 +1,7 @@
 import os
 import driver as D
+import sys
+assert sys.version_info[0:3] == (3, 10, 9)
 
 def validate_python(input_str_len, log_level):
     try:
@@ -9,7 +11,7 @@ def validate_python(input_str_len, log_level):
         if output == "complete":
             return "complete",input_str,""
         elif output == "incomplete":
-            return "incomplete", -1, ""
+            return "incomplete", input_str, ""
         else:
             return "wrong", len(input_str), "input_str[-1]"
     except Exception as e:
@@ -26,9 +28,11 @@ def generate(log_level):
         if log_level:
             print("%s n=%d, c=%s. Input string is %s" % (rv,n,c,curr_str))
         if rv == "complete":
-            return n
+            return ('complete', n)
         elif rv == "wrong":
             continue
+        elif rv == "incomplete":
+            return ('incomplete', n)
         else:
             print("ERROR What is this I dont know !!!")
             break
@@ -37,16 +41,16 @@ def generate(log_level):
 
 import time
 def create_valid_strings(n, log_level):
-    os.remove("valid_inputs.txt") if os.path.exists('valid_inputs.txt') else None
+    os.remove("random_valid_inputs.txt") if os.path.exists('random_valid_inputs.txt') else None
     tic = time.time()
     i = 0
     while True: # while
         i += 1
-        created_string = generate(log_level)
+        stat, created_string = generate(log_level)
         toc = time.time()
         if created_string is not None:
-            with open("valid_inputs.txt", "a") as myfile:
-                var = f"Time used until input was generated: {toc - tic:f}\n" + repr(created_string) + "\n\n"
+            with open("random_valid_inputs.txt", "a") as myfile:
+                var = f"Time used until input was generated: {toc - tic:f}\n" + stat + ':' + repr(created_string) + "\n\n"
                 myfile.write(var)
 
 create_valid_strings(10, 0)
