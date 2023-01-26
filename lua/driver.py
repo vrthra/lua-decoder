@@ -7,7 +7,7 @@ import time
 import string
 MAX_LEN = 1000
 MAX_LOOPS = 100000
-MAX_TRIES = 10000
+MAX_TRIES = 1000
 
 import consts as K
 L_INS = len(K.INSTRUCTIONS)
@@ -46,9 +46,12 @@ def execute_binary(instruction_seq):
     except subprocess.TimeoutExpired:
         return 'tmeout'
     stderr = result.stderr.decode("utf-8")
-    if stderr[-3:] == 'end':
+    stdout = result.stdout.decode("utf-8")
+    if stderr.strip()[-3:] == 'end':
         return 'incomplete'
-    elif stderr == '':
+    if stdout.strip()[-3:] == 'end':
+        return 'incomplete'
+    elif stderr.strip() == '':
         return 'complete'
     else:
         return stderr
@@ -84,6 +87,7 @@ def get_next_char(log_level, pool):
     return input_char
 
 import random
+
 def generate(log_level):
     """
     Feed it one character at a time, and see if the parser rejects it.
@@ -95,27 +99,24 @@ def generate(log_level):
     i = 0
     pool = list(K.INSTRUCTIONS)
     random.shuffle(pool)
+    inputs = []
     while i < MAX_LOOPS:
+        print('>>', len(inputs))
         i += 1
         char = get_next_char(log_level, pool)
-        if not char: return curr_str
+        if not char: break
         curr_str = prev_str + char
         rv, n, c = validate_lua(curr_str, log_level)
 
         if log_level:
             print("%s n=%d, c=%s. Input string is %s" % (rv,n,c,curr_str))
         if rv == "complete":
-            if random.randrange(5) == 0:
-                return curr_str
-            else:
-                pool = list(K.INSTRUCTIONS)
-                random.shuffle(pool)
-                prev_str = curr_str
-                continue
+            break
         elif rv == "incomplete": # go ahead...
             print('.', end='')
+            inputs.append(list(curr_str))
             if len(curr_str) >= MAX_LEN:
-                return curr_str
+                break
             pool = list(K.INSTRUCTIONS)
             random.shuffle(pool)
             prev_str = curr_str
@@ -125,20 +126,22 @@ def generate(log_level):
         else:
             print("ERROR What is this I dont know !!!")
             break
-    return None
+    return inputs
 import time
 def create_valid_strings(n, log_level):
-    os.remove("valid_inputs.txt") if os.path.exists('valid_inputs.txt') else None
+    os.remove("my_valid_inputs.txt") if os.path.exists('my_valid_inputs.txt') else None
     tic = time.time()
     i = 0
-    while True: # while
-        i += 1
-        created_string = generate(log_level)
-        toc = time.time()
-        if created_string is not None:
-            with open("valid_inputs.txt", "a") as myfile:
-                var = f"Time used until input was generated: {toc - tic:f}\n" + repr(created_string) + "\n\n"
+    with open("my_valid_inputs.txt", "w+") as myfile:
+        while True: # while
+            i += 1
+            created_strings = generate(log_level)
+            toc = time.time()
+            for created_string in created_strings:
+                var = (f"Time used until input was generated: {toc - tic:f}\n" + repr(created_string) + "\n\n")
                 myfile.write(var)
+                myfile.flush()
 
+import sys
 if __name__ == '__main__':
     create_valid_strings(10, 0)
