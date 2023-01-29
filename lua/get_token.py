@@ -54,6 +54,7 @@ def generate_first_level_binaries():
     while not TIMED_OUT:
         instruction_seq = generate_random_instruction()
         sinstr = str(instruction_seq)
+        elapsed_time = 0
         if sinstr in SEEN: continue
         SEEN[sinstr] = 'try'
         create_lua_binary(instr_count=NUMBER_OF_INSTRUCTIONS,
@@ -61,16 +62,22 @@ def generate_first_level_binaries():
                 body=instruction_seq,
                 suffix=(RETURN_INSTRUCTION + SUFFIX))
         try:
+            start = time.perf_counter()
             result = subprocess.run(['lua', 'ex.luap'],
-                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=1)
-            SEEN[sinstr] = 'success'
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=0.01)
+            end = time.perf_counter()
+            elapsed_time = end - start
+            SEEN[sinstr] = str(elapsed_time)
         except subprocess.TimeoutExpired:
             SEEN[sinstr] = 'timedout'
             continue
         if len(result.stderr) == 0:
-            SEEN[sinstr] = 'success'
+            SEEN[sinstr] = 'time:' + str(elapsed_time)
         else:
-            SEEN[sinstr] = result.stderr
+            SEEN[sinstr] = str(result.stderr)
+
+        with open("successful_sequences.json", "w") as file:
+            json.dumps(SEEN)
 
 import signal, os
 
@@ -82,10 +89,6 @@ signal.signal(signal.SIGALRM, end_iteration)
 signal.alarm(3600*24)
 
 if __name__ == "__main__":
-    start = time.perf_counter()
     generate_first_level_binaries()
-    end = time.perf_counter()
-    elapsed_time = end - start
-    print(f"Elapsed {elapsed_time:.03f} secs.")
     with open("successful_sequences.json", "w") as file:
         json.dumps(SEEN)
