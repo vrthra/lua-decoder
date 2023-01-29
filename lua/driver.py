@@ -9,7 +9,7 @@ MAX_LEN = 1000
 MAX_LOOPS = 100000
 MAX_TRIES = 1000
 
-import consts as K
+import consts_t as K
 L_INS = len(K.INSTRUCTIONS)
 
 lua_p = 'compiled.luap'
@@ -47,8 +47,6 @@ def execute_binary(instruction_seq):
         return 'tmeout'
     stderr = result.stderr.decode("utf-8")
     stdout = result.stdout.decode("utf-8")
-    if stderr.strip()[-3:] == 'end':
-        return 'incomplete'
     if stdout.strip()[-3:] == 'end':
         return 'incomplete'
     elif stderr.strip() == '':
@@ -117,6 +115,9 @@ def generate(log_level):
             inputs.append(list(curr_str))
             if len(curr_str) >= MAX_LEN:
                 break
+            if random.randint(0,1000) == 0:
+                # with a 1/1000 probabilyt we mark complete.
+                break
             pool = list(K.INSTRUCTIONS)
             random.shuffle(pool)
             prev_str = curr_str
@@ -144,4 +145,6 @@ def create_valid_strings(n, log_level):
 
 import sys
 if __name__ == '__main__':
+    #import pudb
+    #pudb.set_trace()
     create_valid_strings(10, 0)
