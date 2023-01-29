@@ -1,6 +1,5 @@
 import sys
 assert sys.version_info[0:3] == (3, 10, 9)
-# PRE = [100,1,100,2,85,1,1,0] # string
 if sys.argv[1] == 'S':
     PRE = [100,2,100,2,100,2,100,2] # string
 elif sys.argv[1] == 'I':
@@ -63,9 +62,4 @@ with open('tokens.py', 'a') as f:
     f.write('[' + ','.join([str(i) for i in my_args]) + '],' + '\n')
 
 sys.exit(0)
-
-#import marshal
-#marshal.dump(f.__code__, open('f.dump', 'wb+'))
-#code = marshal.load(open('test.dump'))
-#f.__code__ == code
 

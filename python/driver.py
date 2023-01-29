@@ -137,6 +137,7 @@ def generate(log_level):
     random.shuffle(pool)
     inputs = []
     while i < MAX_LOOPS:
+        print(">>", len(inputs), "--", len(pool))
         i += 1
         char = get_next_char(log_level, pool)
         if not char: break # return inputs
